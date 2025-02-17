@@ -1,17 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import { Card, CardContent } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Search } from "lucide-react";
 
 const LandingPage: React.FC = () => {
+
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [showLoginForm, setShowLoginForm] = useState(false);
+
+    const handleLogin = async () => {
+        try {
+          const response = await axios.post("http://localhost:8080/api/auth/login", {
+            username,
+            password,
+          });
+          // Store the token or user info (usually in localStorage or a state management library)
+          localStorage.setItem("authToken", response.data.token);
+    
+          // Redirect to the logged-in page
+          window.location.href = "/logged-in"; // Replace with your actual logged-in route
+        } catch (err) {
+          setError("Invalid credentials");
+        }
+      };
+
   return (
     <div className="w-full min-h-screen bg-gray-100">
       {/* Navigation Bar */}
       <nav className="bg-white shadow-md p-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">EventConnect</h1>
         <div>
-          <Button variant="ghost">Login</Button>
+         <Button variant="ghost" onClick={() => setShowLoginForm(!showLoginForm)}>
+                Login
+            </Button>
           <Button>Sign Up</Button>
         </div>
       </nav>
@@ -41,6 +66,31 @@ const LandingPage: React.FC = () => {
           </Card>
         ))}
       </section>
+
+      {/* Login Form */}
+      {showLoginForm && (
+        <div className="flex justify-center my-6">
+          <div className="bg-white p-6 rounded shadow-md">
+            <h2 className="text-2xl font-bold mb-4">Login</h2>
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="input mb-2"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input mb-2"
+            />
+            <Button onClick={handleLogin} className="w-full">Login</Button>
+            {error && <p className="text-red-500 mt-2">{error}</p>}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white text-center py-4 mt-10">
